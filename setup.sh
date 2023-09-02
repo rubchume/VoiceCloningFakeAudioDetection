@@ -9,7 +9,7 @@ is_azure_environment() {
 
 set_up_environment_for_azure() {
     ENV_NAME=voicecloningenv
-
+    conda init bash
     conda deactivate
     conda env remove --name $ENV_NAME
     conda create -n $ENV_NAME python=3.11 --yes
