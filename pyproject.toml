@@ -8,11 +8,27 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 jupyterlab = "^4.0.5"
-pydub = "^0.25.1"
-simpleaudio = "^1.0.4"
 pandas = "^2.0.3"
 plotly = "^5.16.1"
+ipywidgets = "7.7.1"
 
+[tool.poetry.group.local]
+optional = true
+
+[tool.poetry.group.local.dependencies]
+pydub = "^0.25.1"
+simpleaudio = "^1.0.4"
+
+[tool.poetry.group.azure.dependencies]
+azureml = "^0.2.7"
+azure-ai-ml = "^1.9.0"
+azureml-core = "^1.53.0"
+azureml-fsspec = "^1.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab-widgets = "^3.0.8"
+jupyter-contrib-nbextensions = "^0.7.0"
 
 [build-system]
 requires = ["poetry-core"]
