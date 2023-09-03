@@ -181,6 +181,17 @@ tests = ["attrs[tests-no-zope]", "zope-interface"]
 tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "auditok"
+version = "0.2.0"
+description = "A module for Audio/Acoustic Activity Detection"
+optional = false
+python-versions = "*"
+files = [
+    {file = "auditok-0.2.0-py3-none-any.whl", hash = "sha256:336e3157e2f6c4550182b3272a2ea32d2aca7f251d3b7feeff2d355d280cdc1b"},
+    {file = "auditok-0.2.0.tar.gz", hash = "sha256:46c512e287b2e13df4819774166af32b236d754afbe6b0dc87281b233e5ae688"},
+]
+
+[[package]]
 name = "azure-ai-ml"
 version = "1.9.0"
 description = "Microsoft Azure Machine Learning Client Library for Python"
@@ -3669,4 +3680,4 @@ notebook = ">=4.4.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "74d4c89fe7bb8940c42609e10677cfb713e8b41adcb8aad65902ed3cca65ae92"
+content-hash = "ba85dd4909dc8c3654f99dbe59fdf1376c7bc57e8524266d4ed3031d962cad2b"

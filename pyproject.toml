@@ -11,6 +11,7 @@ jupyterlab = "^4.0.5"
 pandas = "^2.0.3"
 plotly = "^5.16.1"
 ipywidgets = "7.7.1"
+auditok = "^0.2.0"
 
 [tool.poetry.group.local]
 optional = true
