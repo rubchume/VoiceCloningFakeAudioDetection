@@ -7,8 +7,37 @@ is_azure_environment() {
 }
 
 
+get_current_python_virtual_environment() {
+    conda info | extract_row_fields ": " "active environment :" "2"
+}
+
+extract_row_fields() {
+    local separator="$1"
+    local presence_filter="$2"
+    local output_field_index="$3"
+    
+    awk -F "${separator}" "/${presence_filter}/ { print \$${output_field_index} }"
+}
+
+
+conda_environment_exists() {
+  local environment="$1"
+  
+  conda env list | grep -q "^${environment}[[:space:]]"
+  return $?
+}
+
+
+is_python_package_installed() {
+    local package="$1"
+    
+    pip show "${package}" > /dev/null 2>&1
+    
+    return $?
+}
+
+
 set_up_environment_for_azure() {
-    ENV_NAME=voicecloningenv
     conda init bash
     conda deactivate
     conda env remove --name $ENV_NAME
@@ -23,10 +52,36 @@ set_up_environment_for_azure() {
 }
 
 
+activate_poetry() {
+    export PATH="/home/azureuser/poetry/bin:$PATH"
+}
+
+activate_ssh_agent() {
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/github_rubchume
+}
+
+
+ENV_NAME=voicecloningenv
+
 if is_azure_environment; then
     echo "Setting up Python virtual environment for Azure compute instance"
-    set_up_environment_for_azure
+    activePythonEnvironment=$(get_current_python_virtual_environment)
+    echo 
+    if [ "$activePythonEnvironment" != "$ENV_NAME" ]; then
+        if conda_environment_exists $ENV_NAME; then
+            conda activate "$ENV_NAME"
+        else
+            set_up_environment_for_azure
+        fi
+    else
+        echo "Virtual environment is already active"
+    fi
+    activate_poetry
+    activate_ssh_agent
 fi
 
-pip install -U openai-whisper
-sudo apt update && sudo apt install ffmpeg
+if ! is_python_package_installed "openai-whisper"; then
+    pip install -U openai-whisper
+    sudo apt update && sudo apt install ffmpeg
+fi
