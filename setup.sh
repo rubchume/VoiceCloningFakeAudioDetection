@@ -41,19 +41,19 @@ set_up_environment_for_azure() {
     conda init bash
     conda deactivate
     conda env remove --name $ENV_NAME
-    conda create -n $ENV_NAME python=3.11 --yes
+    conda create -n $ENV_NAME python=3.10 --yes
     conda activate $ENV_NAME
     conda install -c anaconda ipykernel --yes
     python -m ipykernel install --user --name=$ENV_NAME
 
-    curl -sSL https://install.python-poetry.org | POETRY_HOME=~/poetry python3 -
-    export PATH="/home/azureuser/poetry/bin:$PATH"
+    curl -sSL https://install.python-poetry.org | POETRY_HOME="${POETRY_GLOBAL_PATH}" python3 -
+    export PATH="${POETRY_GLOBAL_PATH}/bin:$PATH"
     poetry install
 }
 
 
 activate_poetry() {
-    export PATH="/home/azureuser/poetry/bin:$PATH"
+    export PATH="${POETRY_GLOBAL_PATH}/bin:$PATH"
 }
 
 activate_ssh_agent() {
@@ -63,6 +63,7 @@ activate_ssh_agent() {
 
 
 ENV_NAME=voicecloningenv
+POETRY_GLOBAL_PATH=/home/azureuser/poetry/bin
 
 if is_azure_environment; then
     echo "Setting up Python virtual environment for Azure compute instance"
@@ -83,5 +84,5 @@ fi
 
 if ! is_python_package_installed "openai-whisper"; then
     pip install -U openai-whisper
-    sudo apt update && sudo apt install ffmpeg
+    sudo apt update && sudo apt -y install ffmpeg
 fi
