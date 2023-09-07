@@ -12,20 +12,14 @@ pandas = "^2.0.3"
 plotly = "^5.16.1"
 ipywidgets = "7.7.1"
 auditok = "^0.2.0"
-
-[tool.poetry.group.local]
-optional = true
-
-[tool.poetry.group.local.dependencies]
 pydub = "^0.25.1"
-simpleaudio = "^1.0.4"
+numpy = ">=1.24.0 <1.25.0"
 
 [tool.poetry.group.azure.dependencies]
 azureml = "^0.2.7"
 azure-ai-ml = "^1.9.0"
 azureml-core = "^1.53.0"
 azureml-fsspec = "^1.2.0"
-
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab-widgets = "^3.0.8"
