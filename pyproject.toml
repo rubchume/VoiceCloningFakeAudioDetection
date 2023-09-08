@@ -20,6 +20,7 @@ azureml = "^0.2.7"
 azure-ai-ml = "^1.9.0"
 azureml-core = "^1.53.0"
 azureml-fsspec = "^1.2.0"
+azureml-tensorboard = "^1.53.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab-widgets = "^3.0.8"
