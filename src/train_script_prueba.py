@@ -29,7 +29,6 @@ def main(audio_dataset):
         mlflow.log_params(parameters)
         mlflow.log_metric("some_metric", 123)
         
-        print("HELLOOOOO")
         print(list(Path(audio_dataset).iterdir())[:5])
     
     logging.info("Finished training")

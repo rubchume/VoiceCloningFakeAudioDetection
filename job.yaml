@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 code: src
 command: >-
-  python train_script_prueba.py --audio_dataset ${{inputs.audio_dataset}}
+  python train_script.py --audio_dataset ${{inputs.audio_dataset}}
 inputs:
     audio_dataset:
         type: uri_folder
