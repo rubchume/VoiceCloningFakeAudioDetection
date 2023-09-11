@@ -59,9 +59,17 @@ activate_ssh_agent() {
     ssh-add ~/.ssh/github_rubchume
 }
 
+install_tts() {
+    git clone https://github.com/coqui-ai/TTS/
+    cd TTS
+    make system-deps  # only on Linux systems.
+    make install
+    cd ..
+}
+
 
 ENV_NAME=voicecloningenv
-POETRY_GLOBAL_PATH=/home/azureuser/poetry/bin
+POETRY_GLOBAL_PATH=/home/azureuser/poetry
 
 if is_azure_environment; then
     echo "Setting up Python virtual environment for Azure compute instance"
@@ -82,4 +90,8 @@ fi
 if ! is_python_package_installed "openai-whisper"; then
     pip install -U openai-whisper
     sudo apt update && sudo apt -y install ffmpeg
+fi
+
+if ! is_python_package_installed "TTS"; then
+    install_tts
 fi
