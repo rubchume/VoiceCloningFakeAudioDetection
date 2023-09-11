@@ -1,0 +1,8 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+code: src
+command: >-
+  python train_script_prueba.py 
+environment: azureml:voice-cloning-job-environment@latest
+compute: azureml:dev-cluster
+experiment_name: VoiceCloningEvaVits
+description: "The training of VITS for cloning Eva's voice"

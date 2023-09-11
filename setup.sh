@@ -45,14 +45,12 @@ set_up_environment_for_azure() {
     conda activate $ENV_NAME
     conda install -c anaconda ipykernel --yes
     python -m ipykernel install --user --name=$ENV_NAME
-
-    curl -sSL https://install.python-poetry.org | POETRY_HOME="${POETRY_GLOBAL_PATH}" python3 -
-    export PATH="${POETRY_GLOBAL_PATH}/bin:$PATH"
     poetry install
 }
 
 
 activate_poetry() {
+    curl -sSL https://install.python-poetry.org | POETRY_HOME="${POETRY_GLOBAL_PATH}" python3 -
     export PATH="${POETRY_GLOBAL_PATH}/bin:$PATH"
 }
 
@@ -67,8 +65,9 @@ POETRY_GLOBAL_PATH=/home/azureuser/poetry/bin
 
 if is_azure_environment; then
     echo "Setting up Python virtual environment for Azure compute instance"
+    activate_poetry
+    activate_ssh_agent
     activePythonEnvironment=$(get_current_python_virtual_environment)
-    echo 
     if [ "$activePythonEnvironment" != "$ENV_NAME" ]; then
         if conda_environment_exists $ENV_NAME; then
             conda activate "$ENV_NAME"
@@ -78,8 +77,6 @@ if is_azure_environment; then
     else
         echo "Virtual environment is already active"
     fi
-    activate_poetry
-    activate_ssh_agent
 fi
 
 if ! is_python_package_installed "openai-whisper"; then
