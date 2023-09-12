@@ -1,13 +1,13 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-code: src
+code: ../src
 command: >-
     python train_script.py --audio_dataset ${{inputs.audio_dataset}}
 inputs:
     audio_dataset:
         type: uri_folder
-        path: azureml:EvaAudios:1
+        path: azureml:EvaAudios:2
         mode: ro_mount
 environment: azureml:voice-cloning-job-environment@latest
-compute: azureml:dev-cluster-gpu
+compute: azureml:cluster-gpu
 experiment_name: VoiceCloningEvaVits
 description: "The training of VITS for cloning Eva's voice"

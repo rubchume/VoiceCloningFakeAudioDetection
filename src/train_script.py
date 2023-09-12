@@ -17,6 +17,8 @@ from TTS.tts.utils.text import cleaners
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 
+from custom_formatter import custom_formatter
+
 
 def make_command(function):
     parser = argparse.ArgumentParser()
@@ -28,38 +30,6 @@ def make_command(function):
         return function(**vars(args))
     
     return wrapper
-
-
-def custom_formatter(root_path, meta_file, **kwargs):
-    speaker_name = "Eva"
-    with (Path(root_path) / meta_file).open("r", encoding="utf-8") as file:
-        return [
-            {"text": text, "audio_file": str(Path(root_path) / file_name), "speaker_name": speaker_name, "root_path": root_path}
-            for file_name, text in csv.reader(file, delimiter="|")
-        ]
-
-
-def spanish_cleaners(text):
-    """Pipeline for Spanish text"""
-    text = text.lower()
-    text = numbers_to_words(text)
-    text = remove_unknown_characters(text)
-    return text
-
-
-def numbers_to_words(text):
-    def create_replacement(match):
-        number = match.group(0)
-        return num2words(number, lang="es")
-
-    return re.sub(r"\d+", create_replacement, text)
-    
-    
-def remove_unknown_characters(text):
-    characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnñopqrstuvwxyzáéíóú"
-    punctuations = "!'(),-.:;? ¡¿"
-    
-    return re.sub(fr"[^{characters + punctuations}]", "", text)
 
 
 def get_configuration(audio_data: str, output_path: str):
@@ -86,7 +56,6 @@ def get_configuration(audio_data: str, output_path: str):
         epochs=1,
         use_phonemes=False,
         compute_input_seq_cache=True,
-        text_cleaner="spanish_cleaners",
         print_step=25,
         print_eval=True,
         mixed_precision=False,
@@ -108,9 +77,6 @@ def get_configuration(audio_data: str, output_path: str):
     )
     
     return config
-        
-    
-cleaners.spanish_cleaners = spanish_cleaners
 
     
 @make_command
