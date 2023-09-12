@@ -1,7 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 code: ../src
-command: >-
+command: |
     python train_script.py --audio_dataset ${{inputs.audio_dataset}}
+    sleep 1800
 inputs:
     audio_dataset:
         type: uri_folder
@@ -11,3 +12,18 @@ environment: azureml:voice-cloning-job-environment@latest
 compute: azureml:cluster-gpu
 experiment_name: VoiceCloningEvaVits
 description: "The training of VITS for cloning Eva's voice"
+services:
+    my_vs_code:
+        type: vs_code
+        nodes: all
+    my_tensor_board:
+        type: tensor_board
+        log_dir: "model_outputs"
+        nodes: all
+    my_jupyter_lab:
+        type: jupyter_lab
+        nodes: all
+    my_ssh:
+        type: ssh
+        ssh_public_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDR3+eSe9eNbZzlvFIWb9k+WCPtdYuUPFBokfMob+82UHtDOeclutFxvrIX7PEfY1b9pmCPQSVPXgn1jOnLiTQLUV5wEHWD9kQ+mV4YIoBs0m33t7GOX3QzfOADNaoS5/+8CzWSvBs79SZsILCkZU5gF+KDw0ma6Tj2NZXzINo6LLj4dd4Yx0/0we8M7tOOVbPF9vsnGp0XMXy0TlLcujRO+MEdlFwCgdIP2/FNmHHOxGYIaI4NF5QtQzSPZsdOoskSzkVTkFF4y01ZQ54qYDJFOymmsJKt93/yyOCeguVoqCbCu8dnxF57RB5xBEkX7ttEMmbE/cyAkJXrYuJMN95XOKvUnFP4MSFahYIhEGeMo6tlCbso5YyNYKxqVU17p7psUEWlZ12nJuI7EDNDImsRF8T76Y+NqARai7f2D2QatEQvsB8qMUWhPYeA8rHWquRwQtC7wL1qP2rApLu8K847vPm8TkSsrkOD93VInJ4+JO7jbG0+1pH69h+2rY1M5BxCKLOHvfGvjSRrRE9CrleNmVfFwgqvhBifQdgcmDSB2dx0woMATVpSdho3PlTdy2D5DnoRTpqEqwudzBNQzGpDLQclMMPYjqqHnvyEssOE/Zy52GaF0PIcQw6hxkIuPOBsis+ah2ptlCqA+z7PLAdP18HFe+/be8ve9dJiaS4N8w== TTS job monitoring"
+        nodes: all

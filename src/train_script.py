@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 
 import mlflow
+import trainer.trainer as trainer_module
 from trainer import Trainer, TrainerArgs
 from TTS.tts.configs.shared_configs import BaseDatasetConfig
 from TTS.tts.configs.vits_config import VitsConfig
@@ -18,6 +19,9 @@ from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 
 from custom_formatter import custom_formatter
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def make_command(function):
@@ -83,45 +87,48 @@ def get_configuration(audio_data: str, output_path: str):
 def main(audio_dataset):
     logging.info("Start training")
     mlflow.autolog()
-    with mlflow.start_run() as run:
-        output_path = str(Path().resolve())
-        
-        logging.info("Define configurations")
-        configuration = get_configuration(audio_dataset, output_path)
+    
+    output_path = "model_outputs"
 
-        logging.info("Create audio processor")
-        audio_processor = AudioProcessor.init_from_config(configuration)
-        
-        logging.info("Create tokenizer")
-        tokenizer, config = TTSTokenizer.init_from_config(configuration)
+    logging.info("Define configurations")
+    configuration = get_configuration(audio_dataset, output_path)
 
-        logging.info("Create model")
-        model = Vits(configuration, audio_processor, tokenizer, speaker_manager=None)
-        
-        logging.info("Load samples")
-        train_samples, eval_samples = load_tts_samples(
-            configuration.datasets[0],
-            formatter=custom_formatter,
-            eval_split=True,
-            eval_split_max_size=config.eval_split_max_size,
-            eval_split_size=config.eval_split_size,
-        )
-        
-        logging.info("Create trainer")
-        trainer = Trainer(
-            TrainerArgs(),
-            config,
-            output_path,
-            model=model,
-            train_samples=train_samples,
-            eval_samples=eval_samples,
-        )
+    logging.info("Create audio processor")
+    audio_processor = AudioProcessor.init_from_config(configuration)
 
-        logging.info("Train")
-        trainer.fit()
-        
-        logging.info("Log artifacts")
-        mlflow.log_artifacts(trainer.output_path)
+    logging.info("Create tokenizer")
+    tokenizer, config = TTSTokenizer.init_from_config(configuration)
+
+    logging.info("Create model")
+    model = Vits(configuration, audio_processor, tokenizer, speaker_manager=None)
+
+    logging.info("Load samples")
+    train_samples, eval_samples = load_tts_samples(
+        configuration.datasets[0],
+        formatter=custom_formatter,
+        eval_split=True,
+        eval_split_max_size=config.eval_split_max_size,
+        eval_split_size=config.eval_split_size,
+    )
+
+    logging.info("Create trainer")
+    trainer_module.get_experiment_folder_path = lambda path, run_name: path
+    trainer = Trainer(
+        TrainerArgs(),
+        config,
+        output_path,
+        model=model,
+        train_samples=train_samples,
+        eval_samples=eval_samples,
+    )
+
+    logging.info("Train")
+    trainer.fit()
+
+    logging.info(f"Artifacts are in {trainer.output_path}")
+    logging.info(f"Artifacts list: {list(Path(trainer.output_path).iterdir())}")
+    logging.info("Log artifacts")
+    mlflow.log_artifacts(trainer.output_path, artifact_path=output_path)
 
     logging.info("Run was finished")
     
