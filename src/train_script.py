@@ -36,7 +36,7 @@ def make_command(function):
     return wrapper
 
 
-def get_configuration(audio_data: str, output_path: str):
+def get_configuration(audio_data: str, output_path: str, epochs: int):
     dataset_config = BaseDatasetConfig(
         meta_file_train="eva_transcript.txt",
         path=audio_data
@@ -57,7 +57,7 @@ def get_configuration(audio_data: str, output_path: str):
         num_eval_loader_workers=1,
         run_eval=True,
         test_delay_epochs=-1,
-        epochs=1,
+        epochs=epochs,
         use_phonemes=False,
         compute_input_seq_cache=True,
         print_step=25,
@@ -84,14 +84,14 @@ def get_configuration(audio_data: str, output_path: str):
 
     
 @make_command
-def main(audio_dataset):
+def main(audio_dataset, epochs):
     logging.info("Start training")
     mlflow.autolog()
     
     output_path = "model_outputs"
 
     logging.info("Define configurations")
-    configuration = get_configuration(audio_dataset, output_path)
+    configuration = get_configuration(audio_dataset, output_path, epochs)
 
     logging.info("Create audio processor")
     audio_processor = AudioProcessor.init_from_config(configuration)

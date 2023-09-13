@@ -1,27 +1,21 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 code: ../src
 command: |
-    python train_script.py --audio_dataset ${{inputs.audio_dataset}}
-    sleep 1800
+    python train_script.py --audio_dataset ${{inputs.audio_dataset}} --epochs ${{inputs.epochs}}
 inputs:
     audio_dataset:
         type: uri_folder
         path: azureml:EvaAudios:2
         mode: ro_mount
+    epochs: 1000
 environment: azureml:voice-cloning-job-environment@latest
 compute: azureml:cluster-gpu
 experiment_name: VoiceCloningEvaVits
 description: "The training of VITS for cloning Eva's voice"
 services:
-    my_vs_code:
-        type: vs_code
-        nodes: all
     my_tensor_board:
         type: tensor_board
         log_dir: "model_outputs"
-        nodes: all
-    my_jupyter_lab:
-        type: jupyter_lab
         nodes: all
     my_ssh:
         type: ssh
