@@ -5,3 +5,7 @@ data
 vits_eva-*
 artifacts
 __pycache__
+*.amltmp
+fuse_connection.cfg
+*.env
+.amlignore
