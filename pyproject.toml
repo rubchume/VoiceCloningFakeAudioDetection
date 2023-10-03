@@ -24,6 +24,7 @@ datasets = "^2.14.5"
 pandera = "^0.16.1"
 gdown = "^4.7.1"
 gitpython = "^3.1.37"
+torchmetrics = "^1.2.0"
 
 [tool.poetry.group.azure.dependencies]
 azureml = "^0.2.7"
