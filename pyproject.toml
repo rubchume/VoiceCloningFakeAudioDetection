@@ -21,6 +21,9 @@ azureml-mlflow = "^1.53.0"
 num2words = "^0.5.12"
 trainer = "^0.0.31"
 datasets = "^2.14.5"
+pandera = "^0.16.1"
+gdown = "^4.7.1"
+gitpython = "^3.1.37"
 
 [tool.poetry.group.azure.dependencies]
 azureml = "^0.2.7"

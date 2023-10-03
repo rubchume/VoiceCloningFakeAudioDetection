@@ -67,6 +67,21 @@ install_tts() {
     cd ..
 }
 
+install_piper_tts() {
+    sudo apt-get install python3-dev
+    git clone https://github.com/rhasspy/piper.git
+    cd piper/src/python
+    conda create -n piperttsenv python=3.10 --yes
+    conda activate piperttsenv
+    pip3 install --upgrade pip
+    pip3 install --upgrade wheel setuptools
+    pip3 install -e .
+    ./build_monotonic_align.sh
+    conda deactivate
+    sudo apt-get -y install espeak-ng
+    cd -
+}
+
 
 ENV_NAME=voicecloningenv
 POETRY_GLOBAL_PATH=/home/azureuser/poetry
@@ -94,4 +109,8 @@ fi
 
 if ! is_python_package_installed "TTS"; then
     install_tts
+fi
+
+if ! conda_environment_exists "piperttsenv"; then
+    install_piper_tts
 fi

@@ -9,3 +9,6 @@ __pycache__
 fuse_connection.cfg
 *.env
 .amlignore
+models
+piper
+temp

@@ -1,5 +1,7 @@
+import git
 from IPython.core.magic import register_cell_magic, register_line_magic
 from pathlib import Path
+import os
 
 from jinja2 import Environment, select_autoescape
 
@@ -18,3 +20,9 @@ def load_ipython_extension(ipython):
 
         Path(output).write_text(rendered_text)
         return output
+
+    @register_line_magic
+    def cd_repo_root(line):
+        repository_root = git.Repo(".", search_parent_directories=True).working_tree_dir
+        os.chdir(repository_root)
+        return repository_root
