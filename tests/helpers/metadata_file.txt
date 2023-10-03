@@ -1,0 +1,2 @@
+folder_with_audio_wav_files/file_number_1.wav|Hello world
+folder_with_audio_wav_files/file_number_2678.wav|Goodbye world

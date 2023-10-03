@@ -1,0 +1,76 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+experiment_name: eva_VITS_scratch
+description: "The training of VITS for cloning Eva's voice"
+
+compute: azureml:compute-cluster-gpu
+environment: azureml:voice-cloning-job-environment@latest
+code: ../src/eva_VITS_scratch
+command: |
+    python train_script.py --audio_dataset ${inputs.audio_dataset} --epochs ${inputs.epochs}
+
+inputs:
+    audio_dataset:
+        type: uri_folder
+        path: azureml:EvaAudios:2
+        mode: ro_mount
+    epochs: 1000
+
+services:
+    my_tensor_board:
+        type: tensor_board
+        log_dir: "model_outputs"
+        nodes: all
+    my_ssh:
+        type: ssh
+        ssh_public_keys: "-----BEGIN OPENSSH PRIVATE KEY-----
+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
+-----END OPENSSH PRIVATE KEY-----
+"
+        nodes: all
