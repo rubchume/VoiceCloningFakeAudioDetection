@@ -10,6 +10,6 @@ RUN apt-get update && \
 
 COPY conda.yaml /tmp/conda.yaml
 RUN conda env create -n myenv -f /tmp/conda.yaml
-RUN conda activate myenv
+ENV PATH /opt/miniconda/envs/myenv/bin:$PATH
 
 # USER dockeruser
