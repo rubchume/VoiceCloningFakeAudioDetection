@@ -1,0 +1,9 @@
+$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json 
+name: compute-cluster-cheap
+type: amlcompute
+size: Standard_D2as_v4
+description: CPU compute cluster for voice classification testing
+min_instances: 0
+max_instances: 2
+idle_time_before_scale_down: 180
+tier: dedicated

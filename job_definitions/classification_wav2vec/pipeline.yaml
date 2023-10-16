@@ -1,0 +1,49 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+experiment_name: ClonedVoiceDetector
+display_name: ClonedVoiceDetector
+description: Pipeline for cloned voice detection
+
+settings:
+    default_compute: azureml:compute-cluster-cheap
+    
+inputs:
+    common_voice_dataset:
+        type: uri_folder
+        path: azureml:CommonVoiceDeltaSegment15@latest
+        mode: ro_mount
+    cloned_voice_dataset:
+        type: uri_folder
+        path: azureml:TIMITClonedVoices@latest
+        mode: ro_mount
+    epochs: 3
+                
+outputs:
+    checkpoint:
+        type: uri_file
+        mode: upload
+
+jobs:
+    prepare_data:
+        type: command
+        component: prepare_data_component.yaml
+        inputs:
+            common_voice_dataset: ${{parent.inputs.common_voice_dataset}}
+            cloned_voice_dataset: ${{parent.inputs.cloned_voice_dataset}}
+        outputs:
+            real_voice_files:
+                mode: upload
+            cloned_voice_files:
+                mode: upload       
+    train:
+        type: command
+        component: train_component.yaml
+        inputs:
+            real_voices_dataset: ${{parent.inputs.common_voice_dataset}}
+            cloned_voices_dataset: ${{parent.inputs.cloned_voice_dataset}}
+            real_voice_files: ${{parent.jobs.prepare_data.outputs.real_voice_files}}
+            cloned_voice_files: ${{parent.jobs.prepare_data.outputs.cloned_voice_files}}
+            epochs: ${{parent.inputs.epochs}}
+        outputs:
+            checkpoint: ${{parent.outputs.checkpoint}}

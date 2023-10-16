@@ -1,0 +1,6 @@
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: voice-classification-train-environment
+build:
+    path: .
+    dockerfile_path: Dockerfile
+description: Environment created for training jobs in voice classification
