@@ -6,7 +6,8 @@ display_name: ClonedVoiceDetector
 description: Pipeline for cloned voice detection
 
 settings:
-    default_compute: azureml:compute-cluster-cheap
+    # default_compute: azureml:compute-cluster-cheap
+    default_compute: azureml:compute-cluster
     
 inputs:
     common_voice_dataset:
@@ -17,7 +18,7 @@ inputs:
         type: uri_folder
         path: azureml:TIMITClonedVoices@latest
         mode: ro_mount
-    epochs: 3
+    epochs: 250
                 
 outputs:
     checkpoint:

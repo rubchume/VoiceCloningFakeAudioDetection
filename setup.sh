@@ -107,9 +107,9 @@ if ! is_python_package_installed "openai-whisper"; then
     sudo apt update && sudo apt -y install ffmpeg
 fi
 
-# if ! is_python_package_installed "TTS"; then
-#     install_tts
-# fi
+if ! is_python_package_installed "TTS"; then
+    install_tts
+fi
 
 if ! conda_environment_exists "piperttsenv"; then
     install_piper_tts
