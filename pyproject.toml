@@ -25,6 +25,7 @@ pandera = "^0.16.1"
 gdown = "^4.7.1"
 gitpython = "^3.1.37"
 torchmetrics = "^1.2.0"
+pytorch-lightning = "^2.0.9.post0"
 
 [tool.poetry.group.azure.dependencies]
 azureml = "^0.2.7"
@@ -37,6 +38,12 @@ azureml-tensorboard = "^1.53.0"
 jupyterlab-widgets = "^3.0.8"
 jupyter-contrib-nbextensions = "^0.7.0"
 debugpy = "^1.8.0"
+
+
+[tool.poetry.group.hugginface.dependencies]
+transformers = "^4.34.0"
+datasets = "^2.14.5"
+evaluate = "^0.4.0"
 
 [build-system]
 requires = ["poetry-core"]

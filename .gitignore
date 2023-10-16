@@ -12,3 +12,4 @@ fuse_connection.cfg
 models
 piper
 temp
+.ipynb_aml_checkpoints

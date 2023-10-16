@@ -1,0 +1,33 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: train
+display_name: Train detector
+
+inputs:
+    real_voices_dataset:
+        type: uri_folder
+    cloned_voices_dataset:
+        type: uri_folder
+    real_voice_files:
+        type: uri_file
+    cloned_voice_files:
+        type: uri_file
+    epochs:
+        type: integer
+
+outputs:
+    checkpoint:
+        type: uri_file
+
+code: ../../src/classification_wav2vec
+command: >-
+    python train.py
+    --real_voices_dataset ${{inputs.real_voices_dataset}}
+    --cloned_voices_dataset ${{inputs.cloned_voices_dataset}}
+    --real_audio_files ${{inputs.real_voice_files}}
+    --cloned_audio_files ${{inputs.cloned_voice_files}}
+    --checkpoint_path ${{outputs.checkpoint}}
+    --max_epochs ${{inputs.epochs}}
+
+environment: azureml:voice-classification-train-environment@latest
