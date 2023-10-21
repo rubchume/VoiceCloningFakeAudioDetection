@@ -3,33 +3,12 @@ import inspect
 import logging
 from pathlib import Path
 
-import os
-import sys
-
-logging.getLogger().setLevel(logging.INFO)
-logging.info("I am here")
-logging.info(sys.executable)
-
-
-import pkg_resources
-
-def list_installed_packages():
-    installed_packages = [(d.project_name, d.version) for d in pkg_resources.working_set]
-    return installed_packages
-
-for name, version in list_installed_packages():
-    logging.info(f"{name}=={version}")
-
-
 import mlflow
 import pandas as pd
 import pytorch_lightning as pl
 
 from audio_binary_datamodule import DataModule
 from cloned_audio_detector import ClonedAudioDetector
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 def make_command(function):

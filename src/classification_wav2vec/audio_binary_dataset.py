@@ -2,8 +2,8 @@ import random
 from typing import Iterable, List
 
 import numpy as np
-from pydub import AudioSegment
 import torch
+import torchaudio
 from torch.utils.data import Dataset
 
 
@@ -45,20 +45,29 @@ class AudioBinaryDataset(Dataset):
             len(negative_samples_with_label) + len(positive_samples_with_label)
         )
         
+        fft_length = 1024
+        num_mel_filterbanks = 128
+        self.mel_spectogram_calculator = torchaudio.transforms.MelSpectrogram(
+            target_sample_rate,
+            n_fft=fft_length,
+            n_mels=num_mel_filterbanks
+        )
+        
     def __len__(self):
         return len(self.samples)
     
     def __getitem__(self, index):
         audio_file, label = self.samples[index]
-        audio_segment = AudioSegment.from_file(audio_file)
-        audio_resampled = audio_segment.set_frame_rate(self.target_sample_rate)
-        pcm_samples = self._bytes_to_numpy(
-            audio_resampled.raw_data,
-            audio_resampled.sample_width
-        )
-        resized_samples = np.zeros(self.num_samples)
-        resized_samples[:len(pcm_samples)] = pcm_samples[:self.num_samples]
-        return torch.Tensor(resized_samples), label
+        pcm_samples, sample_rate = torchaudio.load(audio_file)
+        pcm_samples = torchaudio.transforms.Resample(sample_rate, self.target_sample_rate)(pcm_samples)
+        resized_samples = torch.zeros((1, self.num_samples))
+        resized_samples[0, :pcm_samples.shape[1]] = pcm_samples[0, :self.num_samples]
+        spectogram = self._get_mel_spectogram(resized_samples)
+        return spectogram, label
+    
+    def _get_mel_spectogram(self, pcm_samples):
+        spectogram = self.mel_spectogram_calculator(pcm_samples)
+        return torchaudio.transforms.AmplitudeToDB(top_db=80)(spectogram)
     
     def _undersample_unbalanced_dataset(self, dataset_A: List, dataset_B: List, max_imbalance):
         if len(dataset_A) > len(dataset_B):
@@ -81,19 +90,4 @@ class AudioBinaryDataset(Dataset):
             return samples_big, samples_small
         else:
             return samples_small, samples_big
-    
-    @staticmethod
-    def _bytes_to_numpy(bytes_stream: bytes, sample_width=2) -> np.array:
-        """
-        sample_width: number of bytes per sample
-        """
-        dtype_map = {
-            1: np.int8,
-            2: np.int16,
-            4: np.int32
-        }
-
-        if sample_width not in dtype_map:
-            raise ValueError(f"Unsupported sample width: {sample_width}")
-
-        return np.frombuffer(bytes_stream, dtype=dtype_map[sample_width])
+                
