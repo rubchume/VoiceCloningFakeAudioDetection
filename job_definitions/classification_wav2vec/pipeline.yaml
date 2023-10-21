@@ -18,7 +18,7 @@ inputs:
         type: uri_folder
         path: azureml:TIMITClonedVoices@latest
         mode: ro_mount
-    epochs: 50
+    epochs: 1
                 
 outputs:
     checkpoint:
