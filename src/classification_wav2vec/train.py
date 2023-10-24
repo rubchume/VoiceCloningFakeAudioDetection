@@ -3,33 +3,17 @@ import inspect
 import logging
 from pathlib import Path
 
-import os
-import sys
-
-logging.getLogger().setLevel(logging.INFO)
-logging.info("I am here")
-logging.info(sys.executable)
-
-
-import pkg_resources
-
-def list_installed_packages():
-    installed_packages = [(d.project_name, d.version) for d in pkg_resources.working_set]
-    return installed_packages
-
-for name, version in list_installed_packages():
-    logging.info(f"{name}=={version}")
-
-
+from azureml.core import Run, Workspace
 import mlflow
 import pandas as pd
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import MLFlowLogger
 
 from audio_binary_datamodule import DataModule
 from cloned_audio_detector import ClonedAudioDetector
 
 
-logging.basicConfig(level=logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 
 def make_command(function):
@@ -63,8 +47,20 @@ def main(
 
     data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list)
 
-    logging.info("Start experiment")
+    try:
+        run = Run.get_context()
+        experiment = getattr(run, "experiment")
+        experiment_name = experiment.name
+        workspace = experiment.workspace
+    except AttributeError:
+        experiment_name = "LocalExperiment"
+        workspace = Workspace.from_config()
+    
+    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
+    mlflow.set_experiment(experiment_name)
     mlflow.autolog()
+
+    logging.info(f"Start experiment {experiment_name}")
     with mlflow.start_run() as run:        
         detector = ClonedAudioDetector()
         trainer = pl.Trainer(
@@ -72,10 +68,9 @@ def main(
             accelerator="auto",
             log_every_n_steps=10,
             callbacks=[],
-            limit_train_batches=5,
-            limit_val_batches=5,
+            # limit_train_batches=5,
+            # limit_val_batches=5,
         )
-
     
         trainer.fit(detector, data_module)
         trainer.test(detector, data_module)

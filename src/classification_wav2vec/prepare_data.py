@@ -17,18 +17,6 @@ def make_command(function):
     return wrapper
 
 
-def get_relative_path(origin, destination):
-    go_up_path = "../"
-    
-    origin_absolute = Path(origin).resolve()
-    destination_absolute = Path(destination).resolve()
-    
-    common_path = Path(os.path.commonpath([origin_absolute, destination_absolute]))
-    from_origin_to_common_path = Path(go_up_path * (len(origin_absolute.parts) - len(common_path.parts)))
-    from_common_path_to_destination = destination_absolute.relative_to(common_path)
-    return from_origin_to_common_path / from_common_path_to_destination
-
-
 @make_command
 def main(common_voice_dataset, cloned_voice_dataset, real_voice_files, cloned_voice_files):
     real_voices_path = Path(common_voice_dataset) / "en"
