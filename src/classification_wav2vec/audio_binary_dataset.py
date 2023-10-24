@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import Iterable, List
 
@@ -5,6 +6,9 @@ import numpy as np
 import torch
 import torchaudio
 from torch.utils.data import Dataset
+
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class AudioBinaryDataset(Dataset):
@@ -58,10 +62,13 @@ class AudioBinaryDataset(Dataset):
     
     def __getitem__(self, index):
         audio_file, label = self.samples[index]
+        # from pathlib import Path; logging.info(f"This file (audio_file) exist? {Path(audio_file).is_file()}")
         pcm_samples, sample_rate = torchaudio.load(audio_file)
+        # raise RuntimeError("Borrar")
         pcm_samples = torchaudio.transforms.Resample(sample_rate, self.target_sample_rate)(pcm_samples)
         resized_samples = torch.zeros((1, self.num_samples))
         resized_samples[0, :pcm_samples.shape[1]] = pcm_samples[0, :self.num_samples]
+        resized_samples /= resized_samples.max()
         spectogram = self._get_mel_spectogram(resized_samples)
         return spectogram, label
     

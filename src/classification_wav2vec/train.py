@@ -51,19 +51,19 @@ def main(
         run = Run.get_context()
         experiment = getattr(run, "experiment")
         experiment_name = experiment.name
+        workspace = experiment.workspace
     except AttributeError:
         experiment_name = "LocalExperiment"
-    ws = Workspace.from_config()
-    mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
+        workspace = Workspace.from_config()
+    
+    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
     mlflow.set_experiment(experiment_name)
+    mlflow.autolog()
 
     logging.info(f"Start experiment {experiment_name}")
-    # mlflow.autolog()
     with mlflow.start_run() as run:        
-        mlogger = MLFlowLogger(experiment_name=experiment_name, run_id=run.info.run_id)
         detector = ClonedAudioDetector()
         trainer = pl.Trainer(
-            logger=mlogger,
             max_epochs=int(max_epochs),
             accelerator="auto",
             log_every_n_steps=10,
