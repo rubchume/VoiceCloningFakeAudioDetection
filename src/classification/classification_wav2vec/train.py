@@ -22,8 +22,9 @@ def make_command(function):
         parser.add_argument(f"--{parameter_name}", type=parameter.annotation if parameter.annotation != inspect._empty else None)
     
     def wrapper():
-        args = parser.parse_args()
-        return function(**vars(args))
+        args, unknown = parser.parse_known_args()
+        non_null_args = {key: value for key, value in vars(args).items() if value is not None}
+        return function(**non_null_args)
     
     return wrapper
 
@@ -35,7 +36,8 @@ def main(
     real_audio_files,
     cloned_audio_files,
     checkpoint_path,
-    max_epochs=3
+    max_epochs=3,
+    max_imbalance=1
 ):
     logging.info("Start training")
     
@@ -44,8 +46,8 @@ def main(
 
     real_audio_files_list = [real_voices_dataset + audio_file for audio_file in real_audio_files_list]
     cloned_audio_files_list = [cloned_voices_dataset + audio_file for audio_file in cloned_audio_files_list]
-
-    data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list)
+    
+    data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list, max_imbalance=int(max_imbalance))
 
     try:
         run = Run.get_context()
@@ -56,14 +58,20 @@ def main(
         experiment_name = "LocalExperiment"
         workspace = Workspace.from_config()
     
-    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
-    mlflow.set_experiment(experiment_name)
-    mlflow.autolog()
+    # mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
+    # mlflow.set_experiment(experiment_name)
+    # mlflow.autolog()
+    mlf_logger = MLFlowLogger(
+        experiment_name=experiment_name,
+        tracking_uri=workspace.get_mlflow_tracking_uri(),
+        log_model=True
+    )
 
     logging.info(f"Start experiment {experiment_name}")
     with mlflow.start_run() as run:        
         detector = ClonedAudioDetector()
         trainer = pl.Trainer(
+            logger=mlf_logger,
             max_epochs=int(max_epochs),
             accelerator="auto",
             log_every_n_steps=10,
@@ -74,7 +82,6 @@ def main(
     
         trainer.fit(detector, data_module)
         trainer.test(detector, data_module)
-        trainer.save_checkpoint(checkpoint_path)
     
     logging.info("Finished training")
     
