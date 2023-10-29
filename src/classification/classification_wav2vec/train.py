@@ -58,31 +58,30 @@ def main(
         experiment_name = "LocalExperiment"
         workspace = Workspace.from_config()
     
-    # mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
-    # mlflow.set_experiment(experiment_name)
-    # mlflow.autolog()
-    mlf_logger = MLFlowLogger(
-        experiment_name=experiment_name,
-        tracking_uri=workspace.get_mlflow_tracking_uri(),
-        log_model=True
-    )
+    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
+    mlflow.set_experiment(experiment_name)
+    mlflow.autolog()
+    # mlf_logger = MLFlowLogger(
+    #     experiment_name=experiment_name,
+    #     tracking_uri=workspace.get_mlflow_tracking_uri(),
+    #     log_model=False
+    # )
 
     logging.info(f"Start experiment {experiment_name}")
-    with mlflow.start_run() as run:        
-        detector = ClonedAudioDetector()
-        trainer = pl.Trainer(
-            logger=mlf_logger,
-            max_epochs=int(max_epochs),
-            accelerator="auto",
-            log_every_n_steps=10,
-            callbacks=[],
-            # limit_train_batches=5,
-            # limit_val_batches=5,
-        )
-    
-        trainer.fit(detector, data_module)
-        trainer.test(detector, data_module)
-    
+    detector = ClonedAudioDetector()
+    trainer = pl.Trainer(
+        # logger=mlf_logger,
+        max_epochs=int(max_epochs),
+        accelerator="auto",
+        log_every_n_steps=10,
+        callbacks=[],
+        # limit_train_batches=5,
+        # limit_val_batches=5,
+    )
+
+    trainer.fit(detector, data_module)
+    trainer.test(detector, data_module)
+    trainer.save_checkpoint(checkpoint_path)
     logging.info("Finished training")
     
 
