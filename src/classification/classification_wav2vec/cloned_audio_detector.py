@@ -166,8 +166,6 @@ class ClonedAudioDetector(pl.LightningModule):
         
     def _predict(self, data):
         logits = self.forward(data)
-        if torch.any(torch.isnan(logits)):
-            logging.info("IS NAN")
         targets_predicted = (logits[:, 1] > logits[:, 0]) * 1
         return logits, targets_predicted
         

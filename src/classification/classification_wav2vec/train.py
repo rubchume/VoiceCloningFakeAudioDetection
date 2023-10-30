@@ -49,40 +49,42 @@ def main(
     
     data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list, max_imbalance=int(max_imbalance))
 
-    try:
-        run = Run.get_context()
-        experiment = getattr(run, "experiment")
-        experiment_name = experiment.name
-        workspace = experiment.workspace
-    except AttributeError:
-        experiment_name = "LocalExperiment"
-        workspace = Workspace.from_config()
+    # try:
+    #     run = Run.get_context()
+    #     # experiment = getattr(run, "experiment") # Remove and get it from run below
+    #     # experiment_name = experiment.name # remove and get it from run below
+    #     # workspace = experiment.workspace
+    # except AttributeError:
+    #     experiment_name = "LocalExperiment"
+    #     # run_id = None
+    #     # workspace = Workspace.from_config()
+    #     mlflow.set_experiment(experiment_name)
     
-    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
-    mlflow.set_experiment(experiment_name)
-    mlflow.autolog()
-    # mlf_logger = MLFlowLogger(
-    #     experiment_name=experiment_name,
-    #     tracking_uri=workspace.get_mlflow_tracking_uri(),
-    #     log_model=False
-    # )
+    # mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri()) # remove
 
-    logging.info(f"Start experiment {experiment_name}")
-    detector = ClonedAudioDetector()
-    trainer = pl.Trainer(
-        # logger=mlf_logger,
-        max_epochs=int(max_epochs),
-        accelerator="auto",
-        log_every_n_steps=10,
-        callbacks=[],
-        # limit_train_batches=5,
-        # limit_val_batches=5,
-    )
+    with mlflow.start_run() as run:
+        mlf_logger = MLFlowLogger(
+            experiment_name=run.info.experiment_id,
+            run_id=run.info.run_id,
+            # tracking_uri=workspace.get_mlflow_tracking_uri(),
+            log_model=False
+        )
+        logging.info(f"Start experiment {run.info.experiment_id}")
+        detector = ClonedAudioDetector()
+        trainer = pl.Trainer(
+            logger=mlf_logger,
+            max_epochs=int(max_epochs),
+            accelerator="auto",
+            # log_every_n_steps=50,
+            callbacks=[],
+            limit_train_batches=50,
+            limit_val_batches=50,
+        )
 
-    trainer.fit(detector, data_module)
-    trainer.test(detector, data_module)
-    trainer.save_checkpoint(checkpoint_path)
-    logging.info("Finished training")
+        trainer.fit(detector, data_module)
+        trainer.test(detector, data_module)
+        trainer.save_checkpoint(checkpoint_path)
+        logging.info("Finished training")
     
 
 if __name__=="__main__":
