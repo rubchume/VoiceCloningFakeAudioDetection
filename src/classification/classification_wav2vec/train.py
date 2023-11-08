@@ -49,24 +49,10 @@ def main(
     
     data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list, max_imbalance=int(max_imbalance))
 
-    # try:
-    #     run = Run.get_context()
-    #     # experiment = getattr(run, "experiment") # Remove and get it from run below
-    #     # experiment_name = experiment.name # remove and get it from run below
-    #     # workspace = experiment.workspace
-    # except AttributeError:
-    #     experiment_name = "LocalExperiment"
-    #     # run_id = None
-    #     # workspace = Workspace.from_config()
-    #     mlflow.set_experiment(experiment_name)
-    
-    # mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri()) # remove
-
     with mlflow.start_run() as run:
         mlf_logger = MLFlowLogger(
             experiment_name=run.info.experiment_id,
             run_id=run.info.run_id,
-            # tracking_uri=workspace.get_mlflow_tracking_uri(),
             log_model=False
         )
         logging.info(f"Start experiment {run.info.experiment_id}")
@@ -77,8 +63,9 @@ def main(
             accelerator="auto",
             # log_every_n_steps=50,
             callbacks=[],
-            limit_train_batches=50,
-            limit_val_batches=50,
+            # limit_train_batches=1000,
+            # limit_val_batches=1000,
+            detect_anomaly=True,
         )
 
         trainer.fit(detector, data_module)

@@ -20,6 +20,7 @@ class ClonedAudioDetector(pl.LightningModule):
         super().__init__()
         self._create_model()
         self._prepare_metrics()
+        self.debug = True
         
     def _create_model_old(self):
         num_labels = 2
@@ -78,7 +79,7 @@ class ClonedAudioDetector(pl.LightningModule):
 
         # Linear Classifier
         self.ap = nn.AdaptiveAvgPool2d(output_size=1)
-        self.lin = nn.Linear(in_features=64, out_features=10)
+        self.lin = nn.Linear(in_features=64, out_features=2)
 
         # Wrap the Convolutional Blocks
         self.conv = nn.Sequential(*conv_layers)
@@ -162,7 +163,14 @@ class ClonedAudioDetector(pl.LightningModule):
         }
         
         self.log(metric_name[stage], loss, prog_bar=True)
-        return loss
+        # import pdb; pdb.set_trace()
+        if torch.any(torch.isnan(loss)):
+            # import pdb; pdb.set_trace()
+            return None
+        else:
+            # if self.debug:
+            #     import pdb; pdb.set_trace()
+            return loss
         
     def _predict(self, data):
         logits = self.forward(data)
@@ -182,7 +190,7 @@ class ClonedAudioDetector(pl.LightningModule):
         self.log(f'{stage.value}_f1', f1_score, prog_bar=True)
         
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
         return optimizer
     
     def get_targets(self, stage: Stage):
