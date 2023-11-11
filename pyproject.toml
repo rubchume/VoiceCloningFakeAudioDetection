@@ -27,6 +27,7 @@ gitpython = "^3.1.37"
 torchmetrics = "^1.2.0"
 pytorch-lightning = "^2.0.9.post0"
 torchaudio = "2.0.2"
+chardet = "^5.2.0"
 
 [tool.poetry.group.azure.dependencies]
 azureml = "^0.2.7"
