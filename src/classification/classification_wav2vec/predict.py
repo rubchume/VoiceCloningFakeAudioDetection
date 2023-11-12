@@ -3,6 +3,8 @@ import inspect
 import itertools
 from pathlib import Path
 import re
+import shutil
+import tempfile
 
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
@@ -13,6 +15,7 @@ from torch.utils.data import DataLoader
 
 from audio_binary_dataset import AudioDumbDataset
 from cloned_audio_detector import ClonedAudioDetector
+from utils import get_workspace, mounted_datastore, upload_files_to_datastore
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -32,7 +35,13 @@ def make_command(function):
 
 
 def get_model(job_name, download_path):
-    ml_client = MLClient.from_config(DefaultAzureCredential())
+    ws = get_workspace()
+    ml_client = MLClient(
+        credential=DefaultAzureCredential(),
+        subscription_id=ws.subscription_id,
+        resource_group_name=ws.resource_group,
+        workspace_name=ws.name,
+    )
     ml_client.jobs.download(
         name=job_name,
         output_name='checkpoint',
@@ -51,7 +60,12 @@ def get_file_batch_indices(file):
 
 
 def predict_macro_batch(model, dataset, predictions_directory, batch_size=100, macro_batch_size=10):
-    files = pd.Series(Path(predictions_directory).iterdir())
+    with mounted_datastore(
+        datastore_name="workspaceblobstore",
+        relative_path=predictions_directory
+    ) as predictions_path:
+        files = pd.Series(Path(predictions_path).iterdir())
+        
     batch_indices = pd.DataFrame(files.map(get_file_batch_indices).dropna().tolist(), columns=["batch_size", "batch_index"]).astype("int")
     
     batch_indices_of_size = batch_indices[batch_indices.batch_size == batch_size].batch_index
@@ -66,16 +80,25 @@ def predict_macro_batch(model, dataset, predictions_directory, batch_size=100, m
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     iterable = itertools.islice(dataloader, batch_start_index, batch_end_index)
 
+    Path("temp").mkdir(exist_ok=True)
     for batch_index, batch in enumerate(tqdm(iterable, total=macro_batch_size), start=batch_start_index):
-        print(f"index: {batch_index}")
         batch_logits = model.forward(batch.to(device))
-        pd.DataFrame(batch_logits.cpu().detach().numpy()).to_csv(Path(predictions_directory) / f"logits_batch_{batch_size}_{batch_index}.csv")
-    
+        pd.DataFrame(batch_logits.cpu().detach().numpy()).to_csv(
+            Path("temp") / f"logits_batch_{batch_size}_{batch_index}.csv",
+            index=False,
+            header=False
+        )
+    upload_files_to_datastore("workspaceblobstore", predictions_directory, "temp", "*.csv")
+    shutil.rmtree("temp", ignore_errors=True)
+        
 
 @make_command
-def main(job_name, model_download_path, audio_files_csv, audio_files_prefix, predictions_path):
-    audio_files = pd.read_csv(audio_files_csv).iloc[:, 0].map(
-        lambda path: str(Path(audio_files_prefix) / path)
+def main(job_name, model_download_path, data_path, audio_files_csv, audio_files_folder, predictions_path):
+    audio_files_folder = Path(data_path) / audio_files_folder
+    audio_files_csv = audio_files_csv
+    
+    audio_files = pd.read_csv(str(audio_files_csv)).iloc[:, 0].map(
+        lambda path: str(Path(audio_files_folder) / path)
     )
     
     detector_loaded = get_model(job_name, model_download_path)
