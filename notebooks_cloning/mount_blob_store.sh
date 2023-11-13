@@ -76,8 +76,8 @@ authType Key
 EOT
 
     sudo chmod 600 fuse_connection.cfg
-    mkdir $mount_path
-    blobfuse $mount_path --tmp-path=/mnt/resource/blobfusetmp --config-file=fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+    sudo mkdir $mount_path
+    sudo blobfuse $mount_path --tmp-path=/mnt/resource/blobfusetmp --config-file=fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 }
 
 

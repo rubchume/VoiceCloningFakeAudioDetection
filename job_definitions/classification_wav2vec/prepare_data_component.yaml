@@ -16,7 +16,7 @@ outputs:
     cloned_voice_files:
         type: uri_file
 
-code: ../../src/classification_wav2vec
+code: ../../src/classification/classification_wav2vec
 command: >-
     python prepare_data.py
     --common_voice_dataset ${{inputs.common_voice_dataset}}

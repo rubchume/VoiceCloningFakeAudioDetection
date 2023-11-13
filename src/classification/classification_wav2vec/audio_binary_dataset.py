@@ -11,6 +11,51 @@ from torch.utils.data import Dataset
 logging.getLogger().setLevel(logging.INFO)
 
 
+def audio_file_to_mel_spectogram(audio_file, target_sample_rate, truncation_num_samples, mel_spectogram_calculator):
+    pcm_samples, sample_rate = torchaudio.load(audio_file)
+    pcm_samples = torchaudio.transforms.Resample(sample_rate, target_sample_rate)(pcm_samples)
+    resized_samples = torch.zeros((1, truncation_num_samples))
+    resized_samples[0, :pcm_samples.shape[1]] = pcm_samples[0, :truncation_num_samples]
+    resized_samples /= resized_samples.max()
+    spectogram = mel_spectogram_calculator(resized_samples)
+    spectogram = torchaudio.transforms.AmplitudeToDB(top_db=80)(spectogram)
+    spectogram /= spectogram.max()
+    return spectogram
+
+
+class AudioDumbDataset(Dataset):
+    def __init__(
+        self,
+        audio_files: Iterable,
+        target_sample_rate: int,
+        num_samples: int,
+    ):
+        self.audio_files = list(audio_files)
+        self.target_sample_rate = target_sample_rate
+        self.num_samples = num_samples
+        
+        fft_length = 1024
+        num_mel_filterbanks = 128
+        self.mel_spectogram_calculator = torchaudio.transforms.MelSpectrogram(
+            target_sample_rate,
+            n_fft=fft_length,
+            n_mels=num_mel_filterbanks
+        )
+
+    def __len__(self):
+        return len(self.audio_files)
+    
+    def __getitem__(self, index):
+        audio_file = self.audio_files[index]
+        spectogram = audio_file_to_mel_spectogram(
+            audio_file,
+            self.target_sample_rate,
+            self.num_samples,
+            self.mel_spectogram_calculator
+        )
+        return spectogram
+        
+
 class AudioBinaryDataset(Dataset):
     def __init__(
         self,
@@ -62,19 +107,13 @@ class AudioBinaryDataset(Dataset):
     
     def __getitem__(self, index):
         audio_file, label = self.samples[index]
-        # from pathlib import Path; logging.info(f"This file (audio_file) exist? {Path(audio_file).is_file()}")
-        pcm_samples, sample_rate = torchaudio.load(audio_file)
-        # raise RuntimeError("Borrar")
-        pcm_samples = torchaudio.transforms.Resample(sample_rate, self.target_sample_rate)(pcm_samples)
-        resized_samples = torch.zeros((1, self.num_samples))
-        resized_samples[0, :pcm_samples.shape[1]] = pcm_samples[0, :self.num_samples]
-        resized_samples /= resized_samples.max()
-        spectogram = self._get_mel_spectogram(resized_samples)
+        spectogram = audio_file_to_mel_spectogram(
+            audio_file,
+            self.target_sample_rate,
+            self.num_samples,
+            self.mel_spectogram_calculator
+        )
         return spectogram, label
-    
-    def _get_mel_spectogram(self, pcm_samples):
-        spectogram = self.mel_spectogram_calculator(pcm_samples)
-        return torchaudio.transforms.AmplitudeToDB(top_db=80)(spectogram)
     
     def _undersample_unbalanced_dataset(self, dataset_A: List, dataset_B: List, max_imbalance):
         if len(dataset_A) > len(dataset_B):

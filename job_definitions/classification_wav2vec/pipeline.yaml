@@ -12,13 +12,14 @@ settings:
 inputs:
     common_voice_dataset:
         type: uri_folder
-        path: azureml:CommonVoiceDeltaSegment15@latest
+        path: azureml:CommonVoiceFull2@latest
         mode: ro_mount
     cloned_voice_dataset:
         type: uri_folder
         path: azureml:TIMITClonedVoices@latest
         mode: ro_mount
     epochs: 1
+    max_imbalance: 10
                 
 outputs:
     checkpoint:
@@ -46,5 +47,6 @@ jobs:
             real_voice_files: ${{parent.jobs.prepare_data.outputs.real_voice_files}}
             cloned_voice_files: ${{parent.jobs.prepare_data.outputs.cloned_voice_files}}
             epochs: ${{parent.inputs.epochs}}
+            max_imbalance: ${{parent.inputs.max_imbalance}}
         outputs:
             checkpoint: ${{parent.outputs.checkpoint}}

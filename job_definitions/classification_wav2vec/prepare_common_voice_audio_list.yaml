@@ -1,0 +1,26 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: prepare_common_voice_data_for_prediction
+display_name: Prepare data for prediction
+
+inputs:
+    common_voice_dataset:
+        type: uri_folder
+        mode: ro_mount
+    files_info_tsv:
+        type: string
+    
+outputs:
+    audio_files_csv:
+        type: uri_file
+        mode: rw_mount
+
+code: ../../src/classification/classification_wav2vec
+command: >-
+    python prepare_common_voice_audio_list.py
+    --common_voice_dataset ${{inputs.common_voice_dataset}}
+    --files_info_tsv ${{inputs.files_info_tsv}}
+    --audio_files_csv ${{outputs.audio_files_csv}}
+
+environment: azureml:prepare-common-voice-audio-list-environment@latest

@@ -60,17 +60,17 @@ activate_ssh_agent() {
 }
 
 install_tts() {
-    git clone https://github.com/coqui-ai/TTS/
-    cd TTS
+    git clone https://github.com/coqui-ai/TTS/ external_libraries/TTS
+    cd external_libraries/TTS
     make system-deps  # only on Linux systems.
     make install
-    cd ..
+    cd -
 }
 
 install_piper_tts() {
     sudo apt-get install python3-dev
-    git clone https://github.com/rhasspy/piper.git
-    cd piper/src/python
+    git clone https://github.com/rhasspy/piper.git external_libraries/piper
+    cd external_libraries/piper/src/python
     conda create -n piperttsenv python=3.10 --yes
     conda activate piperttsenv
     pip3 install --upgrade pip

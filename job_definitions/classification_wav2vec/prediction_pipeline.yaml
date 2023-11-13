@@ -1,0 +1,37 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+experiment_name: ClonedVoiceDetectorPrediction
+display_name: ClonedVoiceDetectorPrediction
+description: Pipeline for cloned voice detection prediction
+
+settings:
+    # default_compute: azureml:
+    default_compute: azureml:compute-cluster
+    
+inputs:
+    common_voice_dataset:
+        type: uri_folder
+        path: azureml:CommonVoiceDeltaSegment15@latest
+        mode: ro_mount
+    training_job_name: "dynamic_yacht_mgxs2hytb1"
+
+jobs:
+    prepare_audio_files:
+        type: command
+        component: prepare_common_voice_audio_list.yaml
+        inputs:
+            common_voice_dataset: ${{parent.inputs.common_voice_dataset}}
+            files_info_tsv: "en/validated.tsv"
+        outputs:
+            audio_files_csv:
+                mode: upload
+    predict:
+        type: command
+        component: prediction_job.yaml
+        inputs:
+            job_name: ${{parent.inputs.training_job_name}}
+            audio_dataset: ${{parent.inputs.common_voice_dataset}}
+            files_csv: ${{parent.jobs.prepare_audio_files.outputs.audio_files_csv}}
+            audio_files_folder: "en/clips/"
+            predictions_path: "Predictions/CommonVoiceDelta15"

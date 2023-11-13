@@ -15,12 +15,14 @@ inputs:
         type: uri_file
     epochs:
         type: integer
+    max_imbalance:
+        type: integer
 
 outputs:
     checkpoint:
         type: uri_file
 
-code: ../../src/classification_wav2vec
+code: ../../src/classification/classification_wav2vec
 command: >-
     python train.py
     --real_voices_dataset ${{inputs.real_voices_dataset}}
@@ -29,5 +31,6 @@ command: >-
     --cloned_audio_files ${{inputs.cloned_voice_files}}
     --checkpoint_path ${{outputs.checkpoint}}
     --max_epochs ${{inputs.epochs}}
+    --max_imbalance ${{inputs.max_imbalance}}
 
 environment: azureml:voice-classification-train-environment@latest

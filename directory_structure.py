@@ -4,15 +4,16 @@ from utilities import get_module_declared_variables, create_variables_in_module
     
     
 paths = dict(
-    data_path=Path("data"),
+    data_path=Path("data/datasets"),
     job_definitions_path=Path("job_definitions"),
-    pipelines_path=Path("pipelines"),
     computes_path=Path("job_definitions") / "computes",
     environments_path=Path("job_definitions") / "environments",
-    source_path=Path("src"),
-    audio_output_path=Path("outputs"),
-    training_artifacts_path=Path("artifacts"),
-    models_path=Path("models"),
+    cloning_source_path=Path("src/cloning"),
+    classification_source_path=Path("src/classification"),
+    audio_output_path=Path("data/cloned_audios"),
+    training_artifacts_path=Path("data/clone_training_artifacts"),
+    models_path=Path("data/voice_cloning_models"),
+    external_libraries_path=Path("external_libraries")
 )
 
 
