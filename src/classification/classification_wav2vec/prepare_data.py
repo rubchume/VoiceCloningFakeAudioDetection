@@ -20,8 +20,8 @@ def make_command(function):
 @make_command
 def main(common_voice_dataset, cloned_voice_dataset, real_voice_files, cloned_voice_files):
     real_voices_path = Path(common_voice_dataset)
-    real_voices_info_file = Path(real_voices_path) / "selected.csv"
-    real_info = pd.read_csv(real_voices_info_file).iloc[:, 0].map(
+    real_voices_info_file = Path(real_voices_path) / "validated.tsv"
+    real_info = pd.read_csv(real_voices_info_file, delimiter="\t").path.map(
         lambda path: str(real_voices_path / "clips" / path)
     )
     

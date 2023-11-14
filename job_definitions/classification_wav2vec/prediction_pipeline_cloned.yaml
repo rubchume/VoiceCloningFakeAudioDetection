@@ -10,34 +10,34 @@ settings:
     default_compute: azureml:compute-cluster
     
 inputs:
-    common_voice_dataset:
+    cloned_voice_dataset:
         type: uri_folder
-        path: azureml:CommonVoiceFull4@latest
+        path: azureml:TIMITClonedVoices@latest
         mode: ro_mount
-    training_job_name: "gray_quince_dz81f9gdyg" #"dynamic_yacht_mgxs2hytb1"
+    training_job_name: "gray_quince_dz81f9gdyg" # "dynamic_yacht_mgxs2hytb1"
     batch_size: 1000
-    macro_batch_size: 1800
+    macro_batch_size: 100
     overwrite: true
 
-jobs:
-    prepare_audio_files:
+jobs:              
+    prepare_audio_files_cloned:
         type: command
-        component: prepare_common_voice_audio_list.yaml
+        component: prepare_timit_audio_list.yaml
         inputs:
-            common_voice_dataset: ${{parent.inputs.common_voice_dataset}}
-            files_info_tsv: "validated.tsv"
+            timit_dataset: ${{parent.inputs.cloned_voice_dataset}}
         outputs:
             audio_files_csv:
                 mode: upload
-    predict:
+            
+    predict_cloned:
         type: command
         component: prediction_job.yaml
         inputs:
             job_name: ${{parent.inputs.training_job_name}}
-            audio_dataset: ${{parent.inputs.common_voice_dataset}}
-            files_csv: ${{parent.jobs.prepare_audio_files.outputs.audio_files_csv}}
-            audio_files_folder: "clips/"
-            predictions_path: "Predictions/CommonVoiceFull"
+            audio_dataset: ${{parent.inputs.cloned_voice_dataset}}
+            files_csv: ${{parent.jobs.prepare_audio_files_cloned.outputs.audio_files_csv}}
+            audio_files_folder: "."
+            predictions_path: "Predictions/TIMITcloned"
             batch_size: ${{parent.inputs.batch_size}}
             macro_batch_size: ${{parent.inputs.macro_batch_size}}
             overwrite: ${{parent.inputs.overwrite}}

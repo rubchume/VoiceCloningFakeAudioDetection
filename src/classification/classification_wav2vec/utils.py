@@ -35,13 +35,19 @@ def suppress_error_print():
         sys.stderr.close()
         sys.stderr = original_stderr
     
-
-@contextmanager
-def mounted_datastore(datastore_name, relative_path):
+    
+def mount_datastore(datastore_name, relative_path):
     workspace = get_workspace()
     datastore = Datastore.get(workspace, datastore_name)
     dataset = AzureCoreDataset.File.from_files(path=(datastore, relative_path))
     mounted_path = dataset.mount()
+    
+    return mounted_path
+
+
+@contextmanager
+def mounted_datastore(datastore_name, relative_path):
+    mounted_path = mount_datastore(datastore_name, relative_path)
     
     with suppress_error_print():
         mounted_path.start()

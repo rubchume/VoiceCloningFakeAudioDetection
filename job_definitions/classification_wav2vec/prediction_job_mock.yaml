@@ -4,7 +4,7 @@ display_name: Predict audio file type
 
 code: ../../src/classification/classification_wav2vec
 command: >-
-    python predict.py 
+    python predict_mock.py 
     --job_name=${{inputs.job_name}}
     --model_download_path="model"
     --data_path=${{inputs.audio_dataset}}
@@ -13,7 +13,6 @@ command: >-
     --predictions_path=${{inputs.predictions_path}}
     --batch_size=${{inputs.batch_size}}
     --macro_batch_size=${{inputs.macro_batch_size}}
-    --overwrite=${{inputs.overwrite}}
 
 inputs:
     job_name:
@@ -32,7 +31,5 @@ inputs:
         type: integer
     macro_batch_size:
         type: integer
-    overwrite:
-        type: boolean
         
 environment: azureml:predict-environment@latest

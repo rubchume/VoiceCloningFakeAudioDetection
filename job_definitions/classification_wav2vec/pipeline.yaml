@@ -12,7 +12,7 @@ settings:
 inputs:
     common_voice_dataset:
         type: uri_folder
-        path: azureml:CommonVoiceFull2@latest
+        path: azureml:CommonVoiceFull4@latest
         mode: ro_mount
     cloned_voice_dataset:
         type: uri_folder
