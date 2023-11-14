@@ -6,15 +6,14 @@ display_name: ClonedVoiceDetectorPrediction
 description: Pipeline for cloned voice detection prediction
 
 settings:
-    # default_compute: azureml:
-    default_compute: azureml:compute-cluster
+    default_compute: azureml:compute-cluster-prediction
     
 inputs:
     common_voice_dataset:
         type: uri_folder
         path: azureml:CommonVoiceFull4@latest
         mode: ro_mount
-    training_job_name: "gray_quince_dz81f9gdyg" #"dynamic_yacht_mgxs2hytb1"
+    training_job_name: "gray_thread_tpzj0trm22" # "gray_quince_dz81f9gdyg" #"dynamic_yacht_mgxs2hytb1"
     batch_size: 1000
     macro_batch_size: 1800
     overwrite: true
@@ -37,7 +36,7 @@ jobs:
             audio_dataset: ${{parent.inputs.common_voice_dataset}}
             files_csv: ${{parent.jobs.prepare_audio_files.outputs.audio_files_csv}}
             audio_files_folder: "clips/"
-            predictions_path: "Predictions/CommonVoiceFull"
+            predictions_path: "Predictions/CommonVoiceFullOffset"
             batch_size: ${{parent.inputs.batch_size}}
             macro_batch_size: ${{parent.inputs.macro_batch_size}}
             overwrite: ${{parent.inputs.overwrite}}
