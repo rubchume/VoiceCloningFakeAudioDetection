@@ -47,7 +47,7 @@ def main(
     real_audio_files_list = [real_voices_dataset + audio_file for audio_file in real_audio_files_list]
     cloned_audio_files_list = [cloned_voices_dataset + audio_file for audio_file in cloned_audio_files_list]
     
-    data_module = DataModule(4, 16000, 64000, real_audio_files_list, cloned_audio_files_list, max_imbalance=int(max_imbalance))
+    data_module = DataModule(4, 16000, 32000, real_audio_files_list, cloned_audio_files_list, max_imbalance=int(max_imbalance))
 
     with mlflow.start_run() as run:
         mlf_logger = MLFlowLogger(

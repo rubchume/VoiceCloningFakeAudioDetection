@@ -15,11 +15,11 @@ def audio_file_to_mel_spectogram(audio_file, target_sample_rate, truncation_num_
     pcm_samples, sample_rate = torchaudio.load(audio_file)
     pcm_samples = torchaudio.transforms.Resample(sample_rate, target_sample_rate)(pcm_samples)
     resized_samples = torch.zeros((1, truncation_num_samples))
-    resized_samples[0, :pcm_samples.shape[1]] = pcm_samples[0, :truncation_num_samples]
-    resized_samples /= resized_samples.max()
+    offset = target_sample_rate
+    pcm_samples_fragment = pcm_samples[0, offset:offset + truncation_num_samples]
+    resized_samples[0, :len(pcm_samples_fragment)] = pcm_samples_fragment
     spectogram = mel_spectogram_calculator(resized_samples)
     spectogram = torchaudio.transforms.AmplitudeToDB(top_db=80)(spectogram)
-    spectogram /= spectogram.max()
     return spectogram
 
 

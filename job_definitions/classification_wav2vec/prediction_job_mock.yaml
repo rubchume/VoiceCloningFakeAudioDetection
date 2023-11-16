@@ -1,0 +1,35 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+name: predict
+display_name: Predict audio file type
+
+code: ../../src/classification/classification_wav2vec
+command: >-
+    python predict_mock.py 
+    --job_name=${{inputs.job_name}}
+    --model_download_path="model"
+    --data_path=${{inputs.audio_dataset}}
+    --audio_files_csv=${{inputs.files_csv}}
+    --audio_files_folder=${{inputs.audio_files_folder}}
+    --predictions_path=${{inputs.predictions_path}}
+    --batch_size=${{inputs.batch_size}}
+    --macro_batch_size=${{inputs.macro_batch_size}}
+
+inputs:
+    job_name:
+        type: string
+    audio_dataset:
+        type: uri_folder
+        mode: ro_mount
+    files_csv:
+        type: uri_file
+        mode: ro_mount
+    audio_files_folder:
+        type: string
+    predictions_path:
+        type: string
+    batch_size:
+        type: integer
+    macro_batch_size:
+        type: integer
+        
+environment: azureml:predict-environment@latest

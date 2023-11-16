@@ -12,13 +12,13 @@ settings:
 inputs:
     common_voice_dataset:
         type: uri_folder
-        path: azureml:CommonVoiceFull2@latest
+        path: azureml:CommonVoiceFull4@latest
         mode: ro_mount
     cloned_voice_dataset:
         type: uri_folder
         path: azureml:TIMITClonedVoices@latest
         mode: ro_mount
-    epochs: 1
+    epochs: 4
     max_imbalance: 10
                 
 outputs:

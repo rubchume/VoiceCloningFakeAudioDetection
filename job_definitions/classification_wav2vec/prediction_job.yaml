@@ -11,6 +11,9 @@ command: >-
     --audio_files_csv=${{inputs.files_csv}}
     --audio_files_folder=${{inputs.audio_files_folder}}
     --predictions_path=${{inputs.predictions_path}}
+    --batch_size=${{inputs.batch_size}}
+    --macro_batch_size=${{inputs.macro_batch_size}}
+    --overwrite=${{inputs.overwrite}}
 
 inputs:
     job_name:
@@ -25,5 +28,11 @@ inputs:
         type: string
     predictions_path:
         type: string
+    batch_size:
+        type: integer
+    macro_batch_size:
+        type: integer
+    overwrite:
+        type: boolean
         
 environment: azureml:predict-environment@latest

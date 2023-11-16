@@ -1,0 +1,42 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+experiment_name: ClonedVoiceDetectorPrediction
+display_name: ClonedVoiceDetectorPrediction
+description: Pipeline for cloned voice detection prediction
+
+settings:
+    default_compute: azureml:compute-cluster-prediction
+    
+inputs:
+    cloned_voice_dataset:
+        type: uri_folder
+        path: azureml:TIMITClonedVoices@latest
+        mode: ro_mount
+    training_job_name: "gray_thread_tpzj0trm22" # "gray_quince_dz81f9gdyg" # "dynamic_yacht_mgxs2hytb1"
+    batch_size: 1000
+    macro_batch_size: 100
+    overwrite: true
+
+jobs:              
+    prepare_audio_files_cloned:
+        type: command
+        component: prepare_timit_audio_list.yaml
+        inputs:
+            timit_dataset: ${{parent.inputs.cloned_voice_dataset}}
+        outputs:
+            audio_files_csv:
+                mode: upload
+            
+    predict_cloned:
+        type: command
+        component: prediction_job.yaml
+        inputs:
+            job_name: ${{parent.inputs.training_job_name}}
+            audio_dataset: ${{parent.inputs.cloned_voice_dataset}}
+            files_csv: ${{parent.jobs.prepare_audio_files_cloned.outputs.audio_files_csv}}
+            audio_files_folder: "."
+            predictions_path: "Predictions/TIMITclonedOffset"
+            batch_size: ${{parent.inputs.batch_size}}
+            macro_batch_size: ${{parent.inputs.macro_batch_size}}
+            overwrite: ${{parent.inputs.overwrite}}

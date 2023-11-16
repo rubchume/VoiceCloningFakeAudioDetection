@@ -59,18 +59,28 @@ def get_file_batch_indices(file):
         return match.groups()
 
 
-def predict_macro_batch(model, dataset, predictions_directory, batch_size=100, macro_batch_size=10):
+def predict_macro_batch(
+    model,
+    dataset,
+    predictions_directory,
+    batch_size: int = 100,
+    macro_batch_size: int = 10,
+    overwrite: bool = False
+):
     with mounted_datastore(
         datastore_name="workspaceblobstore",
         relative_path=predictions_directory
     ) as predictions_path:
         files = pd.Series(Path(predictions_path).iterdir())
         
-    batch_indices = pd.DataFrame(files.map(get_file_batch_indices).dropna().tolist(), columns=["batch_size", "batch_index"]).astype("int")
-    
-    batch_indices_of_size = batch_indices[batch_indices.batch_size == batch_size].batch_index
-    if len(batch_indices_of_size) > 0:
-        last_index = batch_indices_of_size.sort_values(ascending=False).iloc[0]
+    if not overwrite:
+        batch_indices = pd.DataFrame(files.map(get_file_batch_indices).dropna().tolist(), columns=["batch_size", "batch_index"]).astype("int")
+
+        batch_indices_of_size = batch_indices[batch_indices.batch_size == batch_size].batch_index
+        if len(batch_indices_of_size) > 0:
+            last_index = batch_indices_of_size.sort_values(ascending=False).iloc[0]
+        else:
+            last_index = -1
     else:
         last_index = -1
     
@@ -88,12 +98,13 @@ def predict_macro_batch(model, dataset, predictions_directory, batch_size=100, m
             index=False,
             header=False
         )
+        print(f"Batch ({batch_index}/{macro_batch_size}) completed")
     upload_files_to_datastore("workspaceblobstore", predictions_directory, "temp", "*.csv")
     shutil.rmtree("temp", ignore_errors=True)
         
 
 @make_command
-def main(job_name, model_download_path, data_path, audio_files_csv, audio_files_folder, predictions_path):
+def main(job_name, model_download_path, data_path, audio_files_csv, audio_files_folder, predictions_path, batch_size: int = 1000, macro_batch_size: int =100):
     audio_files_folder = Path(data_path) / audio_files_folder
     audio_files_csv = audio_files_csv
     
@@ -103,7 +114,7 @@ def main(job_name, model_download_path, data_path, audio_files_csv, audio_files_
     
     detector_loaded = get_model(job_name, model_download_path)
     dumb_dataset = AudioDumbDataset(audio_files, 16000, 64000)
-    predict_macro_batch(detector_loaded, dumb_dataset, predictions_path, batch_size=10, macro_batch_size=10)
+    predict_macro_batch(detector_loaded, dumb_dataset, predictions_path, batch_size=batch_size, macro_batch_size=macro_batch_size)
 
     
 if __name__=="__main__":
