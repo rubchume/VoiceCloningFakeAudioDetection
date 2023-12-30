@@ -48,5 +48,8 @@ And I am afraid that with the passing of the months and the years, the code I us
 That being said, once I made the chosen algorithm work for my case, the performance was very good. The WER was about 20%, which is quite good considering that there was the cloning step and the transcribing step adding inaccuracies.
 
 With respect to the classification step, different algorithms were used but the most convenient and accurate way of doing it is still the classic approach of computing MEL-spectograms and classifying them with a simple CNN. At least for this use case, the performance was very good.
+
+![image](https://github.com/rubchume/VoiceCloningFakeAudioDetection/assets/83817841/4ebbbfad-0efa-44da-a5bf-4be82e0c33e2)
+
 As stated above, the use of Azure jobs was crucial for this to be completed.
 Another difficulty I found was that the cutting of audios (the offset) had to be adjusted to avoid overfitting, since all synthetic voices shared the same amount of initial offset.
